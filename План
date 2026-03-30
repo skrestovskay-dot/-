@@ -302,10 +302,10 @@ border-color: #bcddce;
 <div id="plansForDate" class="plans-list"></div>
 </div>
 
-<!-- БЛОК 2: Планировка быта (кто за что отвечает) -->
+<!-- БЛОК 2: Планировка быта (только Саша и Артем) -->
 <div class="card">
 <h2>🧹 Планировка быта</h2>
-<p style="font-size:0.85rem; margin-bottom: 0.7rem;">👨‍👩‍👧 Ответственные: нажми на имя, чтобы сменить</p>
+<p style="font-size:0.85rem; margin-bottom: 0.7rem;">👥 Ответственные: <strong>Саша</strong> и <strong>Артем</strong> — нажми на имя, чтобы переключить</p>
 <div id="dutiesContainer"></div>
 <div class="add-duty">
 <input type="text" id="newDutyName" placeholder="Новая обязанность, например: Вынос мусора">
@@ -488,16 +488,18 @@ renderCalendar();
 renderPlansForDate();
 }
 
-// ======================== 2. ПЛАНИРОВКА БЫТА ========================
+// ======================== 2. ПЛАНИРОВКА БЫТА (только Саша и Артем) ========================
+// Массив обязанностей, где ответственными могут быть только "Саша" или "Артем"
 let duties = JSON.parse(localStorage.getItem('ecoDuties')) || [
-{ name: "🍽 Мытьё посуды", assigned: "Мама" },
-{ name: "🧹 Уборка в гостиной", assigned: "Папа" },
-{ name: "🐕 Выгул собаки", assigned: "Дочь" },
-{ name: "🧺 Стирка", assigned: "Мама" },
-{ name: "🗑 Вынос мусора", assigned: "Папа" }
+{ name: "🍽 Мытьё посуды", assigned: "Саша" },
+{ name: "🧹 Уборка в гостиной", assigned: "Артем" },
+{ name: "🐕 Выгул собаки", assigned: "Саша" },
+{ name: "🧺 Стирка", assigned: "Артем" },
+{ name: "🗑 Вынос мусора", assigned: "Саша" }
 ];
 
-const defaultMembers = ["Мама", "Папа", "Дочь", "Сын", "Общая смена"];
+// Только два имени для переключения
+const allowedMembers = ["Саша", "Артем"];
 
 function saveDuties() {
 localStorage.setItem('ecoDuties', JSON.stringify(duties));
@@ -518,17 +520,21 @@ dutyDiv.innerHTML = `
 `;
 container.appendChild(dutyDiv);
 });
-// обработчики смены ответственного
+// обработчики смены ответственного: циклически переключаем между Сашей и Артемом
 document.querySelectorAll('.duty-assign').forEach(el => {
 el.addEventListener('click', (e) => {
 const idx = parseInt(el.getAttribute('data-idx'));
 let current = duties[idx].assigned;
-let nextIndex = (defaultMembers.indexOf(current) + 1) % defaultMembers.length;
-if (nextIndex === -1) nextIndex = 0;
-duties[idx].assigned = defaultMembers[nextIndex] || "Мама"
+// Определяем индекс текущего имени в allowedMembers
+let currentIdx = allowedMembers.indexOf(current);
+// Переключаем на следующее (если current не найден — начинаем с Саши)
+let nextIdx = (currentIdx + 1) % allowedMembers.length;
+if (currentIdx === -1) nextIdx = 0;
+duties[idx].assigned = allowedMembers[nextIdx];
 saveDuties();
 });
 });
+// удаление обязанности
 document.querySelectorAll('[data-remove]').forEach(btn => {
 btn.addEventListener('click', (e) => {
 const idx = parseInt(btn.getAttribute('data-remove'));
@@ -542,7 +548,8 @@ function addNewDuty() {
 const input = document.getElementById('newDutyName');
 let name = input.value.trim();
 if (name === "") return alert("Введите название обязанности");
-duties.push({ name: name, assigned: "Мама" });
+// По умолчанию назначаем Сашу (можно и Артема — по желанию)
+duties.push({ name: name, assigned: "Саша" });
 input.value = ""
 saveDuties();
 }
@@ -659,7 +666,7 @@ renderCalendar();
 renderPlansForDate();
 });
 
-// быт
+// быт (только Саша и Артем)
 renderDuties();
 document.getElementById('addDutyBtn').addEventListener('click', addNewDuty);
 
