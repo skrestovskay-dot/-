@@ -270,6 +270,129 @@ padding: 12px;
 font-size: 1rem;
 }
 
+/* ========== СТИЛИ ДЛЯ КНИГИ-МЕНЮ (разворот) ========== */
+.book-spread {
+background: #fef9e8;
+border-radius: 1.5rem;
+padding: 1.2rem;
+margin-top: 0.5rem;
+box-shadow: inset 0 0 0 1px #f5e7c8, 0 8px 20px rgba(60, 40, 20, 0.08);
+position: relative;
+}
+
+.book-spread::before {
+content: "📖";
+position: absolute;
+top: -12px;
+left: 20px;
+font-size: 2rem;
+opacity: 0.5;
+transform: rotate(-15deg);
+}
+
+.meal-header {
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+border-bottom: 2px dashed #d9c8a7;
+padding-bottom: 0.5rem;
+margin-bottom: 1rem;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+.meal-date-selector {
+display: flex;
+align-items: center;
+gap: 12px;
+background: #f2ecdc;
+padding: 6px 12px;
+border-radius: 60px;
+}
+
+.meal-date-selector input {
+background: white;
+border: 1px solid #dacba8;
+border-radius: 40px;
+padding: 6px 12px;
+font-size: 0.85rem;
+}
+
+.meal-section {
+margin-bottom: 1rem;
+background: #fffcf0;
+border-radius: 1rem;
+padding: 0.8rem;
+border-left: 4px solid #9eb87c;
+}
+
+.meal-section h4 {
+font-size: 1rem;
+color: #6b4c2c;
+margin-bottom: 0.5rem;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.meal-items {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+margin-bottom: 10px;
+align-items: center;
+}
+
+.meal-tag {
+background: #e7e0cf;
+border-radius: 30px;
+padding: 5px 12px;
+font-size: 0.8rem;
+display: inline-flex;
+align-items: center;
+gap: 6px;
+}
+
+.meal-tag .remove-meal {
+cursor: pointer;
+font-weight: bold;
+color: #a5512c;
+margin-left: 6px;
+}
+
+.add-meal-input {
+display: flex;
+gap: 6px;
+margin-top: 6px;
+}
+
+.add-meal-input input {
+flex: 1;
+padding: 6px 10px;
+border-radius: 30px;
+border: 1px solid #ddd0b2;
+background: white;
+font-size: 0.8rem;
+}
+
+.add-meal-input button {
+padding: 5px 12px;
+font-size: 0.7rem;
+background: #9eb87c;
+}
+
+.meal-actions {
+margin-top: 0.8rem;
+text-align: right;
+}
+
+.icon-btn {
+background: #e2d9c4;
+color: #4d3e2b;
+padding: 4px 12px;
+font-size: 0.7rem;
+}
+
 footer {
 text-align: center;
 margin-top: 2.5rem;
@@ -334,162 +457,135 @@ border-color: #bcddce;
 <hr>
 <div style="font-size:0.8rem; text-align:center;">Добавляйте романтику в расписание!</div>
 </div>
+
+<!-- БЛОК 5: КУЛИНАРНАЯ КНИГА - МЕНЮ НА ДЕНЬ (разворот) -->
+<div class="card">
+<h2>📖 Кулинарная книга</h2>
+<p style="font-size:0.8rem; margin-bottom: 0.5rem;">🍽 Планируйте меню на каждый день — полноценный разворот для завтрака, обеда и ужина</p>
+<div class="book-spread" id="menuBookSpread">
+<div class="meal-header">
+<span style="font-weight: 600; font-size: 1.1rem;">📅 Меню на день</span>
+<div class="meal-date-selector">
+<label style="font-size:0.75rem;">Выбрать дату:</label>
+<input type="date" id="menuDatePicker" value="">
 </div>
-<footer>🌿 Эко-планинг — планируйте дела, быт и заботу друг о друге в светло-зелёной атмосфере</footer>
+</div>
+
+<div id="dailyMenuContainer">
+<!-- Завтрак -->
+<div class="meal-section">
+<h4>🌞 ЗАВТРАК</h4>
+<div id="breakfastItems" class="meal-items"></div>
+<div class="add-meal-input">
+<input type="text" id="newBreakfastItem" placeholder="Блюдо, например: Овсянка с ягодами">
+<button id="addBreakfastBtn">➕ Добавить</button>
+</div>
+</div>
+
+<!-- Обед -->
+<div class="meal-section">
+<h4>🍲 ОБЕД</h4>
+<div id="lunchItems" class="meal-items"></div>
+<div class="add-meal-input">
+<input type="text" id="newLunchItem" placeholder="Блюдо, например: Суп с фрикадельками">
+<button id="addLunchBtn">➕ Добавить</button>
+</div>
+</div>
+
+<!-- Ужин -->
+<div class="meal-section">
+<h4>🌙 УЖИН</h4>
+<div id="dinnerItems" class="meal-items"></div>
+<div class="add-meal-input">
+<input type="text" id="newDinnerItem" placeholder="Блюдо, например: Запеченная рыба">
+<button id="addDinnerBtn">➕ Добавить</button>
+</div>
+</div>
+</div>
+<div class="meal-actions">
+<button id="copyTodayMenuBtn" class="icon-btn" style="background:#d4e0ca;">📋 Скопировать сегодняшнее меню</button>
+</div>
+</div>
+</div>
+</div>
+<footer>🌿 Эко-планинг — планируйте дела, быт, меню и заботу друг о друге в светло-зелёной атмосфере</footer>
 
 <script>
 // ======================== 1. КАЛЕНДАРЬ-ПЛАНЕР ========================
-let currentDate = new Date(); // текущий отображаемый месяц
-let selectedDateStr = "" // выбранная дата в формате YYYY-MM-DD
-
-// Хранилище планов: ключ - дата (YYYY-MM-DD), значение - массив строк
+let currentDate = new Date();
+let selectedDateStr = "";
 let plans = JSON.parse(localStorage.getItem('ecoPlans')) || {};
 
-function savePlansToLocal() {
-localStorage.setItem('ecoPlans', JSON.stringify(plans));
-}
-
-// получить дату в формате YYYY-MM-DD
+function savePlansToLocal() { localStorage.setItem('ecoPlans', JSON.stringify(plans)); }
 function formatYMD(date) {
 let y = date.getFullYear();
-let m = String(date.getMonth() + 1).padStart(2, '0');
-let d = String(date.getDate()).padStart(2, '0');
+let m = String(date.getMonth() + 1).padStart(2,'0');
+let d = String(date.getDate()).padStart(2,'0');
 return `${y}-${m}-${d}`;
 }
 
-// отрисовка календаря
 function renderCalendar() {
-const year = currentDate.getFullYear();
-const month = currentDate.getMonth();
+const year = currentDate.getFullYear(), month = currentDate.getMonth();
 const firstDayOfMonth = new Date(year, month, 1);
-const startWeekday = firstDayOfMonth.getDay(); // 0 воскресенье
-const daysInMonth = new Date(year, month + 1, 0).getDate();
-
+const startWeekday = firstDayOfMonth.getDay();
+const daysInMonth = new Date(year, month+1, 0).getDate();
 const calendarGrid = document.getElementById('calendarGrid');
 calendarGrid.innerHTML = '';
-
-// заголовки дней недели (Пн, Вт, Ср ...)
-const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-for (let w of weekdays) {
-let wdDiv = document.createElement('div');
-wdDiv.className = 'cal-weekday';
-wdDiv.innerText = w;
-calendarGrid.appendChild(wdDiv);
-}
-
-// корректировка, чтобы первым днём был понедельник (getDay() воскресенье = 0)
-let offset = (startWeekday === 0 ? 6 : startWeekday - 1);
-let totalCells = 42;
+const weekdays = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+weekdays.forEach(w => { let d=document.createElement('div'); d.className='cal-weekday'; d.innerText=w; calendarGrid.appendChild(d); });
+let offset = (startWeekday === 0 ? 6 : startWeekday-1);
 let dayCounter = 1;
-
-for (let i = 0; i < totalCells; i++) {
-let cell = document.createElement('div');
-cell.className = 'cal-day';
-if (i < offset || dayCounter > daysInMonth) {
-cell.innerText = '';
-cell.style.background = '#f1f9f0';
-cell.style.opacity = '0.5';
-cell.style.cursor = 'default';
-calendarGrid.appendChild(cell);
-continue;
+for(let i=0;i<42;i++){
+let cell=document.createElement('div'); cell.className='cal-day';
+if(i<offset || dayCounter>daysInMonth){
+cell.innerText=''; cell.style.background='#f1f9f0'; cell.style.opacity='0.5'; cell.style.cursor='default';
+calendarGrid.appendChild(cell); continue;
 }
-let dayNum = dayCounter;
-let cellDate = new Date(year, month, dayNum);
-let cellDateStr = formatYMD(cellDate);
-cell.innerText = dayNum;
-
-// если на эту дату есть планы, добавляем класс
-if (plans[cellDateStr] && plans[cellDateStr].length > 0) {
-cell.classList.add('has-plan');
-}
-
-// подсветка выбранной даты
-if (cellDateStr === selectedDateStr) {
-cell.classList.add('selected');
-}
-
-cell.addEventListener('click', (function(dateStr, dayNumVal) {
-return function() {
-selectedDateStr = dateStr;
-renderCalendar(); // перерисуем для снятия/установки выделения
-renderPlansForDate();
-document.getElementById('selectedDateInfo').innerText = `📌 Выбрано: ${dateStr}`;
-};
-})(cellDateStr, dayNum));
-
+let dayNum=dayCounter;
+let cellDate=new Date(year, month, dayNum);
+let cellDateStr=formatYMD(cellDate);
+cell.innerText=dayNum;
+if(plans[cellDateStr] && plans[cellDateStr].length) cell.classList.add('has-plan');
+if(cellDateStr===selectedDateStr) cell.classList.add('selected');
+cell.addEventListener('click', (function(ds){ return function(){ selectedDateStr=ds; renderCalendar(); renderPlansForDate(); document.getElementById('selectedDateInfo').innerText=`📌 Выбрано: ${ds}`; }; })(cellDateStr));
 calendarGrid.appendChild(cell);
 dayCounter++;
 }
-const monthNames = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
-document.getElementById('monthYearLabel').innerText = `${monthNames[month]} ${year}`;
+const monthNames=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+document.getElementById('monthYearLabel').innerText=`${monthNames[month]} ${year}`;
 }
-
-// отобразить планы для выбранной даты
-function renderPlansForDate() {
-const container = document.getElementById('plansForDate');
-if (!selectedDateStr) {
-container.innerHTML = '<div style="padding: 8px; background:#eef3ea; border-radius: 40px;">Выберите дату в календаре</div>';
-return;
-}
-const planList = plans[selectedDateStr] || [];
-if (planList.length === 0) {
-container.innerHTML = '<div style="padding: 8px; background:#eef3ea; border-radius: 40px;">✨ Нет планов на этот день. Добавьте что-нибудь!</div>';
-return;
-}
-container.innerHTML = '';
-planList.forEach((plan, idx) => {
-const div = document.createElement('div');
-div.className = 'plan-item';
-div.innerHTML = `<span>📋 ${escapeHtml(plan)}</span><span class="delete-plan" data-date="${selectedDateStr}" data-idx="${idx}">✖ Удалить</span>`;
+function renderPlansForDate(){
+const container=document.getElementById('plansForDate');
+if(!selectedDateStr){ container.innerHTML='<div style="padding:8px; background:#eef3ea; border-radius:40px;">Выберите дату</div>'; return; }
+const list=plans[selectedDateStr]||[];
+if(list.length===0){ container.innerHTML='<div style="padding:8px; background:#eef3ea; border-radius:40px;">✨ Нет планов</div>'; return; }
+container.innerHTML='';
+list.forEach((p,idx)=>{
+let div=document.createElement('div'); div.className='plan-item';
+div.innerHTML=`<span>📋 ${escapeHtml(p)}</span><span class="delete-plan" data-date="${selectedDateStr}" data-idx="${idx}">✖ Удалить</span>`;
 container.appendChild(div);
 });
-// делегирование удаления
-document.querySelectorAll('.delete-plan').forEach(el => {
-el.addEventListener('click', (e) => {
+document.querySelectorAll('.delete-plan').forEach(el=>{
+el.addEventListener('click',(e)=>{
 e.stopPropagation();
-const date = el.getAttribute('data-date');
-const idx = parseInt(el.getAttribute('data-idx'));
-if (plans[date] && plans[date][idx]) {
-plans[date].splice(idx, 1);
-if (plans[date].length === 0) delete plans[date];
-savePlansToLocal();
-renderCalendar();
-renderPlansForDate();
-}
+let date=el.getAttribute('data-date'), idx=parseInt(el.getAttribute('data-idx'));
+if(plans[date] && plans[date][idx]){ plans[date].splice(idx,1); if(plans[date].length===0) delete plans[date]; savePlansToLocal(); renderCalendar(); renderPlansForDate(); }
 });
 });
 }
-
-function escapeHtml(str) {
-return str.replace(/[&<>]/g, function(m) {
-if (m === '&') return '&amp;';
-if (m === '<') return '&lt;';
-if (m === '>') return '&gt;';
-return m;
-});
-}
-
-function addPlanToSelected() {
-if (!selectedDateStr) {
-alert("Сначала выберите день в календаре!");
-return;
-}
-const input = document.getElementById('planInput');
-let text = input.value.trim();
-if (text === "") {
-alert("Введите текст плана");
-return;
-}
-if (!plans[selectedDateStr]) plans[selectedDateStr] = [];
+function escapeHtml(str){ return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+function addPlanToSelected(){
+if(!selectedDateStr){ alert("Выберите день"); return; }
+let text=document.getElementById('planInput').value.trim();
+if(!text) { alert("Введите план"); return; }
+if(!plans[selectedDateStr]) plans[selectedDateStr]=[];
 plans[selectedDateStr].push(text);
 savePlansToLocal();
-input.value = ""
-renderCalendar();
-renderPlansForDate();
+document.getElementById('planInput').value="";
+renderCalendar(); renderPlansForDate();
 }
 
-// ======================== 2. ПЛАНИРОВКА БЫТА (только Саша и Артем) ========================
-// Массив обязанностей, где ответственными могут быть только "Саша" или "Артем"
+// ======================== 2. БЫТ: ТОЛЬКО САША И АРТЕМ ========================
 let duties = JSON.parse(localStorage.getItem('ecoDuties')) || [
 { name: "🍽 Мытьё посуды", assigned: "Саша" },
 { name: "🧹 Уборка в гостиной", assigned: "Артем" },
@@ -497,191 +593,206 @@ let duties = JSON.parse(localStorage.getItem('ecoDuties')) || [
 { name: "🧺 Стирка", assigned: "Артем" },
 { name: "🗑 Вынос мусора", assigned: "Саша" }
 ];
-
-// Только два имени для переключения
 const allowedMembers = ["Саша", "Артем"];
-
-function saveDuties() {
-localStorage.setItem('ecoDuties', JSON.stringify(duties));
-renderDuties();
-}
-
-function renderDuties() {
-const container = document.getElementById('dutiesContainer');
-if (!container) return;
-container.innerHTML = '';
-duties.forEach((duty, idx) => {
-const dutyDiv = document.createElement('div');
-dutyDiv.className = 'duty-item';
-dutyDiv.innerHTML = `
-<span class="duty-name">${escapeHtml(duty.name)}</span>
-<span class="duty-assign" data-idx="${idx}">👤 ${escapeHtml(duty.assigned)} ↻</span>
-<button style="background:#ccded2; color:#2d5a45; padding:5px 12px;" data-remove="${idx}">🗑</button>
-`;
-container.appendChild(dutyDiv);
-});
-// обработчики смены ответственного: циклически переключаем между Сашей и Артемом
-document.querySelectorAll('.duty-assign').forEach(el => {
-el.addEventListener('click', (e) => {
-const idx = parseInt(el.getAttribute('data-idx'));
-let current = duties[idx].assigned;
-// Определяем индекс текущего имени в allowedMembers
-let currentIdx = allowedMembers.indexOf(current);
-// Переключаем на следующее (если current не найден — начинаем с Саши)
-let nextIdx = (currentIdx + 1) % allowedMembers.length;
-if (currentIdx === -1) nextIdx = 0;
-duties[idx].assigned = allowedMembers[nextIdx];
-saveDuties();
-});
-});
-// удаление обязанности
-document.querySelectorAll('[data-remove]').forEach(btn => {
-btn.addEventListener('click', (e) => {
-const idx = parseInt(btn.getAttribute('data-remove'));
-duties.splice(idx, 1);
-saveDuties();
-});
-});
-}
-
-function addNewDuty() {
-const input = document.getElementById('newDutyName');
-let name = input.value.trim();
-if (name === "") return alert("Введите название обязанности");
-// По умолчанию назначаем Сашу (можно и Артема — по желанию)
-duties.push({ name: name, assigned: "Саша" });
-input.value = ""
-saveDuties();
-}
-
-// ======================== 3. СПИСОК ПРОДУКТОВ (зеленый/красный) ========================
-let groceries = JSON.parse(localStorage.getItem('ecoGroceries')) || [
-{ name: "Молоко", inStock: true },
-{ name: "Хлеб", inStock: false },
-{ name: "Яйца", inStock: true },
-{ name: "Помидоры", inStock: false },
-{ name: "Яблоки", inStock: true }
-];
-
-function saveGroceries() {
-localStorage.setItem('ecoGroceries', JSON.stringify(groceries));
-renderGroceries();
-}
-
-function renderGroceries() {
-const container = document.getElementById('groceryListContainer');
-if (!container) return;
-container.innerHTML = '';
-groceries.forEach((item, idx) => {
-const div = document.createElement('div');
-div.className = 'grocery-item';
-const statusClass = item.inStock ? 'green-status' : 'red-status';
-const statusText = item.inStock ? '🟢 Есть' : '🔴 Нужно';
-div.style.borderLeftColor = item.inStock ? '#6fbf4c' : '#e07c6b';
-div.innerHTML = `
-<span style="flex:2; font-weight:500;">🥬 ${escapeHtml(item.name)}</span>
-<span class="grocery-status ${statusClass}" data-idx="${idx}">${statusText}</span>
-<button style="background:#dbeadf; color:#3f674b; margin-left:6px;" data-delg="${idx}">❌</button>
-`;
+function saveDuties(){ localStorage.setItem('ecoDuties',JSON.stringify(duties)); renderDuties(); }
+function renderDuties(){
+const container=document.getElementById('dutiesContainer'); if(!container) return;
+container.innerHTML='';
+duties.forEach((duty,idx)=>{
+const div=document.createElement('div'); div.className='duty-item';
+div.innerHTML=`<span class="duty-name">${escapeHtml(duty.name)}</span><span class="duty-assign" data-idx="${idx}">👤 ${escapeHtml(duty.assigned)} ↻</span><button style="background:#ccded2; color:#2d5a45;" data-remove="${idx}">🗑</button>`;
 container.appendChild(div);
 });
-// переключение статуса
-document.querySelectorAll('.grocery-status').forEach(el => {
-el.addEventListener('click', (e) => {
-const idx = parseInt(el.getAttribute('data-idx'));
-groceries[idx].inStock = !groceries[idx].inStock;
-saveGroceries();
+document.querySelectorAll('.duty-assign').forEach(el=>{
+el.addEventListener('click',()=>{
+const idx=parseInt(el.getAttribute('data-idx'));
+let current=duties[idx].assigned;
+let curIdx=allowedMembers.indexOf(current);
+let nextIdx=(curIdx+1)%allowedMembers.length;
+if(curIdx===-1) nextIdx=0;
+duties[idx].assigned=allowedMembers[nextIdx];
+saveDuties();
 });
 });
-document.querySelectorAll('[data-delg]').forEach(btn => {
-btn.addEventListener('click', (e) => {
-const idx = parseInt(btn.getAttribute('data-delg'));
-groceries.splice(idx, 1);
-saveGroceries();
+document.querySelectorAll('[data-remove]').forEach(btn=>{
+btn.addEventListener('click',()=>{
+const idx=parseInt(btn.getAttribute('data-remove'));
+duties.splice(idx,1); saveDuties();
 });
 });
 }
-
-function addNewGrocery() {
-const input = document.getElementById('newGroceryName');
-let name = input.value.trim();
-if (name === "") return alert("Введите название продукта");
-groceries.push({ name: name, inStock: false });
-input.value = ""
-saveGroceries();
+function addNewDuty(){
+let name=document.getElementById('newDutyName').value.trim();
+if(!name) return alert("Введите название");
+duties.push({ name: name, assigned: "Саша" });
+document.getElementById('newDutyName').value="";
+saveDuties();
 }
 
-// ======================== 4. ГЕНЕРАТОР СВИДАНИЙ ========================
-const dateIdeas = [
-"🌅 Пикник на закате с пледом и горячим чаем",
-"🍕 Кулинарный вечер: приготовить вместе ужин и устроить дегустацию",
-"🎨 Совместный урок рисования (акварель или вино + живопись)",
-"🚴‍♀️ Велосипедная прогулка в парк с фотосессией",
-"🎬 Домашний кинотеатр с попкорном и любимыми фильмами",
-"🧩 Вечер настольных игр с уютными пледом и аромасвечами",
-"♨️ Спа-день: маски, ванна с пеной и расслабляющая музыка",
-"🌿 Поход в оранжерею или ботанический сад",
-"🎤 Караоке дома или в караоке-баре (дуэты)",
-"🗝 Квест-комната или домашний квест с сюрпризами",
-"🏕 Выходные на природе с палаткой и костром",
-"🍷 Дегустация сыров/вина с тематическим плейлистом",
-"📚 Совместное чтение вслух и обсуждение книги",
-"🎭 Экспромт-театр: придумать небольшую сценку",
-"🧘‍♀️ Утренняя йога на траве и полезный завтрак"
+// ======================== 3. ПРОДУКТЫ ========================
+let groceries = JSON.parse(localStorage.getItem('ecoGroceries')) || [
+{ name:"Молоко", inStock:true },{ name:"Хлеб", inStock:false },{ name:"Яйца", inStock:true },
+{ name:"Помидоры", inStock:false },{ name:"Яблоки", inStock:true }
 ];
-
-function generateRandomDate() {
-const randomIndex = Math.floor(Math.random() * dateIdeas.length);
-return dateIdeas[randomIndex];
+function saveGroceries(){ localStorage.setItem('ecoGroceries',JSON.stringify(groceries)); renderGroceries(); }
+function renderGroceries(){
+const container=document.getElementById('groceryListContainer'); if(!container) return;
+container.innerHTML='';
+groceries.forEach((item,idx)=>{
+const div=document.createElement('div'); div.className='grocery-item';
+const statusClass=item.inStock?'green-status':'red-status';
+const statusText=item.inStock?'🟢 Есть':'🔴 Нужно';
+div.style.borderLeftColor=item.inStock?'#6fbf4c':'#e07c6b';
+div.innerHTML=`<span style="flex:2;">🥬 ${escapeHtml(item.name)}</span><span class="grocery-status ${statusClass}" data-idx="${idx}">${statusText}</span><button data-delg="${idx}" style="background:#dbeadf;">❌</button>`;
+container.appendChild(div);
+});
+document.querySelectorAll('.grocery-status').forEach(el=>{
+el.addEventListener('click',()=>{ let idx=parseInt(el.getAttribute('data-idx')); groceries[idx].inStock=!groceries[idx].inStock; saveGroceries(); });
+});
+document.querySelectorAll('[data-delg]').forEach(btn=>{
+btn.addEventListener('click',()=>{ let idx=parseInt(btn.getAttribute('data-delg')); groceries.splice(idx,1); saveGroceries(); });
+});
+}
+function addNewGrocery(){
+let name=document.getElementById('newGroceryName').value.trim();
+if(!name) return alert("Введите продукт");
+groceries.push({ name: name, inStock: false });
+document.getElementById('newGroceryName').value="";
+saveGroceries();
 }
 
-function updateDateDisplay() {
-const container = document.getElementById('dateIdeaDisplay');
-if (container) {
-const newIdea = generateRandomDate();
-container.innerHTML = `✨ ${newIdea} ✨`;
+// ======================== 4. СВИДАНИЯ ========================
+const dateIdeas=["🌅 Пикник на закате","🍕 Кулинарный вечер","🎨 Совместный урок рисования","🚴‍♀️ Велосипедная прогулка","🎬 Домашний кинотеатр","🧩 Настольные игры","♨️ Спа-день","🌿 Поход в оранжерею","🎤 Караоке","🗝 Квест-комната","🏕 Выходные на природе","🍷 Дегустация сыров","📚 Чтение вслух","🎭 Экспромт-театр","🧘‍♀️ Утренняя йога"];
+function generateRandomDate(){ return dateIdeas[Math.floor(Math.random()*dateIdeas.length)]; }
+function updateDateDisplay(){ document.getElementById('dateIdeaDisplay').innerHTML=`✨ ${generateRandomDate()} ✨`; }
+
+// ======================== 5. КУЛИНАРНАЯ КНИГА (МЕНЮ НА ДЕНЬ) ========================
+let dailyMenus = JSON.parse(localStorage.getItem('ecoDailyMenus')) || {};
+// структура: dailyMenus["2025-03-30"] = { breakfast: ["каша"], lunch: ["суп"], dinner: ["котлета"] }
+
+function saveMenusToLocal(){ localStorage.setItem('ecoDailyMenus', JSON.stringify(dailyMenus)); }
+
+function getCurrentMenuDate(){
+let picker = document.getElementById('menuDatePicker');
+if(picker.value) return picker.value;
+let today = formatYMD(new Date());
+picker.value = today;
+return today;
+}
+
+function renderMenuForDate(dateStr){
+if(!dateStr) return;
+if(!dailyMenus[dateStr]) dailyMenus[dateStr] = { breakfast: [], lunch: [], dinner: [] };
+const menu = dailyMenus[dateStr];
+// завтрак
+const breakfastDiv = document.getElementById('breakfastItems');
+breakfastDiv.innerHTML = '';
+menu.breakfast.forEach((item, idx) => {
+let tag = document.createElement('span'); tag.className='meal-tag';
+tag.innerHTML = `${escapeHtml(item)} <span class="remove-meal" data-type="breakfast" data-idx="${idx}">✖</span>`;
+breakfastDiv.appendChild(tag);
+});
+// обед
+const lunchDiv = document.getElementById('lunchItems');
+lunchDiv.innerHTML = '';
+menu.lunch.forEach((item, idx) => {
+let tag = document.createElement('span'); tag.className='meal-tag';
+tag.innerHTML = `${escapeHtml(item)} <span class="remove-meal" data-type="lunch" data-idx="${idx}">✖</span>`;
+lunchDiv.appendChild(tag);
+});
+// ужин
+const dinnerDiv = document.getElementById('dinnerItems');
+dinnerDiv.innerHTML = '';
+menu.dinner.forEach((item, idx) => {
+let tag = document.createElement('span'); tag.className='meal-tag';
+tag.innerHTML = `${escapeHtml(item)} <span class="remove-meal" data-type="dinner" data-idx="${idx}">✖</span>`;
+dinnerDiv.appendChild(tag);
+});
+
+// делегирование удаления
+document.querySelectorAll('.remove-meal').forEach(el => {
+el.removeEventListener('click', handleRemoveMeal);
+el.addEventListener('click', handleRemoveMeal);
+});
+}
+
+function handleRemoveMeal(e){
+let target = e.currentTarget;
+let type = target.getAttribute('data-type');
+let idx = parseInt(target.getAttribute('data-idx'));
+let currentDate = getCurrentMenuDate();
+if(!dailyMenus[currentDate]) return;
+if(type === 'breakfast') dailyMenus[currentDate].breakfast.splice(idx,1);
+else if(type === 'lunch') dailyMenus[currentDate].lunch.splice(idx,1);
+else if(type === 'dinner') dailyMenus[currentDate].dinner.splice(idx,1);
+if(dailyMenus[currentDate].breakfast.length===0 && dailyMenus[currentDate].lunch.length===0 && dailyMenus[currentDate].dinner.length===0){
+delete dailyMenus[currentDate];
+}
+saveMenusToLocal();
+renderMenuForDate(currentDate);
+}
+
+function addMealItem(type){
+let currentDate = getCurrentMenuDate();
+if(!dailyMenus[currentDate]) dailyMenus[currentDate] = { breakfast: [], lunch: [], dinner: [] };
+let inputId = '', inputValue = '';
+if(type === 'breakfast') { inputId = 'newBreakfastItem'; inputValue = document.getElementById('newBreakfastItem').value.trim(); }
+else if(type === 'lunch') { inputId = 'newLunchItem'; inputValue = document.getElementById('newLunchItem').value.trim(); }
+else if(type === 'dinner') { inputId = 'newDinnerItem'; inputValue = document.getElementById('newDinnerItem').value.trim(); }
+if(!inputValue) { alert("Введите блюдо"); return; }
+dailyMenus[currentDate][type].push(inputValue);
+saveMenusToLocal();
+renderMenuForDate(currentDate);
+if(type === 'breakfast') document.getElementById('newBreakfastItem').value = '';
+else if(type === 'lunch') document.getElementById('newLunchItem').value = '';
+else if(type === 'dinner') document.getElementById('newDinnerItem').value = '';
+}
+
+function copyTodayMenu(){
+let todayStr = formatYMD(new Date());
+let currentDate = getCurrentMenuDate();
+if(!dailyMenus[currentDate]) { alert("На выбранный день нет меню, нечего копировать"); return; }
+let sourceMenu = dailyMenus[currentDate];
+dailyMenus[todayStr] = JSON.parse(JSON.stringify(sourceMenu));
+saveMenusToLocal();
+alert(`Меню скопировано на сегодня (${todayStr})!`);
+if(getCurrentMenuDate() === todayStr) renderMenuForDate(todayStr);
+}
+
+function onMenuDateChange(){
+let newDate = document.getElementById('menuDatePicker').value;
+if(newDate){
+renderMenuForDate(newDate);
 }
 }
 
 // ======================== ИНИЦИАЛИЗАЦИЯ ========================
-function init() {
-// календарь: если нет выбранной даты, выберем сегодняшнюю
-if (!selectedDateStr) {
-selectedDateStr = formatYMD(new Date());
-}
+function init(){
+if(!selectedDateStr) selectedDateStr = formatYMD(new Date());
 renderCalendar();
 renderPlansForDate();
-document.getElementById('selectedDateInfo').innerText = `📌 Выбрано: ${selectedDateStr}`;
-
-// планы кнопки
+document.getElementById('selectedDateInfo').innerText=`📌 Выбрано: ${selectedDateStr}`;
 document.getElementById('addPlanBtn').addEventListener('click', addPlanToSelected);
-document.getElementById('prevMonthBtn').addEventListener('click', () => {
-currentDate.setMonth(currentDate.getMonth() - 1);
-renderCalendar();
-renderPlansForDate();
-});
-document.getElementById('nextMonthBtn').addEventListener('click', () => {
-currentDate.setMonth(currentDate.getMonth() + 1);
-renderCalendar();
-renderPlansForDate();
-});
-
-// быт (только Саша и Артем)
+document.getElementById('prevMonthBtn').addEventListener('click',()=>{ currentDate.setMonth(currentDate.getMonth()-1); renderCalendar(); renderPlansForDate(); });
+document.getElementById('nextMonthBtn').addEventListener('click',()=>{ currentDate.setMonth(currentDate.getMonth()+1); renderCalendar(); renderPlansForDate(); });
 renderDuties();
 document.getElementById('addDutyBtn').addEventListener('click', addNewDuty);
-
-// продукты
 renderGroceries();
 document.getElementById('addGroceryBtn').addEventListener('click', addNewGrocery);
+document.getElementById('generateDateBtn').addEventListener('click', updateDateDisplay);
+document.getElementById('dateIdeaDisplay').innerHTML=`💚 ${generateRandomDate()} 💚`;
 
-// генератор свиданий
-document.getElementById('generateDateBtn').addEventListener('click', () => {
-updateDateDisplay();
-});
-// стартовое отображение идеи
-document.getElementById('dateIdeaDisplay').innerHTML = `💚 ${generateRandomDate()} 💚`;
+// инициализация кулинарной книги
+let todayDefault = formatYMD(new Date());
+let menuPicker = document.getElementById('menuDatePicker');
+menuPicker.value = todayDefault;
+renderMenuForDate(todayDefault);
+menuPicker.addEventListener('change', onMenuDateChange);
+document.getElementById('addBreakfastBtn').addEventListener('click', ()=> addMealItem('breakfast'));
+document.getElementById('addLunchBtn').addEventListener('click', ()=> addMealItem('lunch'));
+document.getElementById('addDinnerBtn').addEventListener('click', ()=> addMealItem('dinner'));
+document.getElementById('copyTodayMenuBtn').addEventListener('click', copyTodayMenu);
 }
-
 init();
 </script>
 </body>
