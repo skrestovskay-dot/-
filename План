@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Эко-Планинг — Семейная синхронизация</title>
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (опционально) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
@@ -306,68 +306,92 @@
             padding: 20px;
             color: #2e7d64;
         }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 <body>
 <div class="sync-status" id="syncStatus">
-    <span>🔄 Синхронизация в реальном времени</span>
-    <span id="syncIndicator" class="sync-online">● Подключено</span>
+    <span>🔄 Семейная синхронизация</span>
+    <span id="syncIndicator" class="sync-online">💾 Локальное сохранение</span>
 </div>
 <div class="dashboard" id="dashboard">
-    <div class="loading">⏳ Загрузка данных...</div>
+    <div class="loading">⏳ Загрузка...</div>
 </div>
-<footer>🌿 Эко-планинг — все изменения видны всем участникам семьи в реальном времени</footer>
+<footer>
+    🌿 Эко-планинг — данные сохраняются в браузере<br>
+    🔗 <a href="https://github.com/yourusername/eco-family-planner" style="color: #2e7d64;">GitHub</a> | 
+    💡 Все изменения видны на всех устройствах при включённой синхронизации
+</footer>
 
 <script>
-    // ==================== КОНФИГУРАЦИЯ FIREBASE ====================
-    // Это публичная конфигурация для демонстрации (используется бесплатный план Firebase)
-    // Вы можете создать свой проект Firebase и заменить эти данные
-    const firebaseConfig = {
-        apiKey: "AIzaSyC3qJpC8L9xK7mN2vB5nM8qW3eR4tY6uI7oP9zX1cV2bN3mK4jH5",
-        authDomain: "eco-planning-family.firebaseapp.com",
-        databaseURL: "https://eco-planning-family-default-rtdb.europe-west1.firebasedatabase.app",
-        projectId: "eco-planning-family",
-        storageBucket: "eco-planning-family.firebasestorage.app",
-        messagingSenderId: "123456789012",
-        appId: "1:123456789012:web:abc123def456ghi789jkl"
-    };
+    // ==================== КОНФИГУРАЦИЯ ====================
+    // Для включения облачной синхронизации:
+    // 1. Создайте проект в Firebase
+    // 2. Раскомментируйте блок ниже и добавьте свои ключи
+    // 3. Установите useFirebase = true
     
-    // ИНИЦИАЛИЗАЦИЯ FIREBASE (создаем тестовый проект, если не существует, используем локальное хранилище как fallback)
+    const useFirebase = false;  // Установите true для облачной синхронизации
+    
     let database = null;
     let dbEnabled = false;
-    let app = null;
     
-    // Пытаемся инициализировать Firebase
-    try {
-        if (typeof firebase !== 'undefined' && firebase.initializeApp) {
-            app = firebase.initializeApp(firebaseConfig);
-            database = firebase.database(app);
-            dbEnabled = true;
-            console.log("✅ Firebase подключена, синхронизация активна");
-            document.getElementById('syncIndicator').innerHTML = '● Синхронизация активна';
-            document.getElementById('syncIndicator').className = 'sync-online';
-        } else {
-            throw new Error("Firebase SDK не загружен");
+    // Firebase конфигурация (замените на свои данные)
+    const firebaseConfig = {
+        apiKey: "YOUR_API_KEY",
+        authDomain: "YOUR_PROJECT.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+        projectId: "YOUR_PROJECT",
+        storageBucket: "YOUR_PROJECT.firebasestorage.app",
+        messagingSenderId: "YOUR_SENDER_ID",
+        appId: "YOUR_APP_ID"
+    };
+    
+    // Инициализация Firebase (если включена)
+    if (useFirebase) {
+        try {
+            if (typeof firebase !== 'undefined' && firebase.initializeApp) {
+                const app = firebase.initializeApp(firebaseConfig);
+                database = firebase.database(app);
+                dbEnabled = true;
+                console.log("✅ Firebase подключена");
+                document.getElementById('syncIndicator').innerHTML = '☁️ Синхронизация активна';
+                document.getElementById('syncIndicator').className = 'sync-online';
+            }
+        } catch (e) {
+            console.warn("⚠️ Ошибка Firebase, работаем локально", e);
+            dbEnabled = false;
         }
-    } catch (e) {
-        console.warn("⚠️ Firebase не настроена, работаем в локальном режиме", e);
-        dbEnabled = false;
-        document.getElementById('syncIndicator').innerHTML = '⚠️ Локальный режим (без синхронизации)';
+    }
+    
+    if (!dbEnabled) {
+        document.getElementById('syncIndicator').innerHTML = '💾 Локальное сохранение';
         document.getElementById('syncIndicator').className = 'sync-offline';
     }
     
     // ==================== ГЛОБАЛЬНЫЕ ДАННЫЕ ====================
-    let plans = {};      // { "2024-01-15": ["план1", "план2"] }
-    let duties = [];     // [{ name: "...", assigned: "..." }]
-    let groceries = [];  // [{ name: "...", inStock: true/false }]
-    
+    let plans = {};
+    let duties = [];
+    let groceries = [];
     let currentDate = new Date();
     let selectedDateStr = "";
-    let isInitialized = false;
     
     // ==================== ФУНКЦИИ СИНХРОНИЗАЦИИ ====================
     function saveAllToFirebase() {
-        if (!dbEnabled || !database) return;
+        if (!dbEnabled || !database) {
+            saveToLocalStorage();
+            return;
+        }
         const updates = {
             '/plans': plans,
             '/duties': duties,
@@ -375,6 +399,7 @@
         };
         database.ref().update(updates).catch(err => {
             console.error("Ошибка синхронизации:", err);
+            saveToLocalStorage();
         });
     }
     
@@ -416,28 +441,31 @@
     
     function getDefaultGroceries() {
         return [
-            { name: "Молоко", inStock: true },
-            { name: "Хлеб", inStock: false },
-            { name: "Яйца", inStock: true },
-            { name: "Помидоры", inStock: false },
-            { name: "Яблоки", inStock: true }
+            { name: "🥛 Молоко", inStock: true },
+            { name: "🍞 Хлеб", inStock: false },
+            { name: "🥚 Яйца", inStock: true },
+            { name: "🍅 Помидоры", inStock: false },
+            { name: "🍎 Яблоки", inStock: true }
         ];
     }
     
     function saveToLocalStorage() {
-        localStorage.setItem('ecoPlans_backup', JSON.stringify(plans));
-        localStorage.setItem('ecoDuties_backup', JSON.stringify(duties));
-        localStorage.setItem('ecoGroceries_backup', JSON.stringify(groceries));
+        localStorage.setItem('ecoPlans', JSON.stringify(plans));
+        localStorage.setItem('ecoDuties', JSON.stringify(duties));
+        localStorage.setItem('ecoGroceries', JSON.stringify(groceries));
+        localStorage.setItem('ecoLastBackup', new Date().toISOString());
     }
     
     function loadFromLocalStorage() {
-        const savedPlans = localStorage.getItem('ecoPlans_backup');
-        const savedDuties = localStorage.getItem('ecoDuties_backup');
-        const savedGroceries = localStorage.getItem('ecoGroceries_backup');
+        const savedPlans = localStorage.getItem('ecoPlans');
+        const savedDuties = localStorage.getItem('ecoDuties');
+        const savedGroceries = localStorage.getItem('ecoGroceries');
         
         plans = savedPlans ? JSON.parse(savedPlans) : {};
         duties = savedDuties ? JSON.parse(savedDuties) : getDefaultDuties();
         groceries = savedGroceries ? JSON.parse(savedGroceries) : getDefaultGroceries();
+        
+        console.log("📦 Данные загружены из localStorage");
     }
     
     // ==================== UI ФУНКЦИИ ====================
@@ -514,7 +542,7 @@
             dayCounter++;
         }
         
-        const monthNames = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
         const monthLabel = document.getElementById('monthYearLabel');
         if (monthLabel) monthLabel.innerText = `${monthNames[month]} ${year}`;
     }
@@ -524,7 +552,7 @@
         if (!container) return;
         
         if (!selectedDateStr) {
-            container.innerHTML = '<div style="padding: 8px; background:#eef3ea; border-radius: 40px;">Выберите дату в календаре</div>';
+            container.innerHTML = '<div style="padding: 8px; background:#eef3ea; border-radius: 40px;">📅 Выберите дату в календаре</div>';
             return;
         }
         
@@ -550,8 +578,7 @@
                 if (plans[date] && plans[date][idx]) {
                     plans[date].splice(idx, 1);
                     if (plans[date].length === 0) delete plans[date];
-                    if (dbEnabled) saveAllToFirebase();
-                    else saveToLocalStorage();
+                    saveAllToFirebase();
                     renderFullDashboard();
                 }
             });
@@ -560,19 +587,18 @@
     
     function addPlanToSelected() {
         if (!selectedDateStr) {
-            alert("Сначала выберите день в календаре!");
+            alert("📅 Сначала выберите день в календаре!");
             return;
         }
         const input = document.getElementById('planInput');
         let text = input.value.trim();
         if (text === "") {
-            alert("Введите текст плана");
+            alert("✏️ Введите текст плана");
             return;
         }
         if (!plans[selectedDateStr]) plans[selectedDateStr] = [];
         plans[selectedDateStr].push(text);
-        if (dbEnabled) saveAllToFirebase();
-        else saveToLocalStorage();
+        saveAllToFirebase();
         input.value = "";
         renderFullDashboard();
     }
@@ -581,6 +607,8 @@
         const container = document.getElementById('dutiesContainer');
         if (!container) return;
         container.innerHTML = '';
+        
+        const familyMembers = ["Мама", "Папа", "Дочь", "Сын", "Бабушка", "Дедушка", "Общая смена"];
         
         duties.forEach((duty, idx) => {
             const dutyDiv = document.createElement('div');
@@ -596,13 +624,11 @@
         document.querySelectorAll('.duty-assign').forEach(el => {
             el.addEventListener('click', (e) => {
                 const idx = parseInt(el.getAttribute('data-idx'));
-                const members = ["Мама", "Папа", "Дочь", "Сын", "Общая смена"];
                 let current = duties[idx].assigned;
-                let nextIndex = (members.indexOf(current) + 1) % members.length;
-                if (nextIndex === -1) nextIndex = 0;
-                duties[idx].assigned = members[nextIndex] || "Мама";
-                if (dbEnabled) saveAllToFirebase();
-                else saveToLocalStorage();
+                let nextIndex = (familyMembers.indexOf(current) + 1) % familyMembers.length;
+                if (nextIndex === -1 || !familyMembers[nextIndex]) nextIndex = 0;
+                duties[idx].assigned = familyMembers[nextIndex];
+                saveAllToFirebase();
                 renderFullDashboard();
             });
         });
@@ -611,8 +637,7 @@
             btn.addEventListener('click', (e) => {
                 const idx = parseInt(btn.getAttribute('data-remove'));
                 duties.splice(idx, 1);
-                if (dbEnabled) saveAllToFirebase();
-                else saveToLocalStorage();
+                saveAllToFirebase();
                 renderFullDashboard();
             });
         });
@@ -621,11 +646,10 @@
     function addNewDuty() {
         const input = document.getElementById('newDutyName');
         let name = input.value.trim();
-        if (name === "") return alert("Введите название обязанности");
+        if (name === "") return alert("📝 Введите название обязанности");
         duties.push({ name: name, assigned: "Мама" });
         input.value = "";
-        if (dbEnabled) saveAllToFirebase();
-        else saveToLocalStorage();
+        saveAllToFirebase();
         renderFullDashboard();
     }
     
@@ -652,8 +676,7 @@
             el.addEventListener('click', (e) => {
                 const idx = parseInt(el.getAttribute('data-idx'));
                 groceries[idx].inStock = !groceries[idx].inStock;
-                if (dbEnabled) saveAllToFirebase();
-                else saveToLocalStorage();
+                saveAllToFirebase();
                 renderFullDashboard();
             });
         });
@@ -662,8 +685,7 @@
             btn.addEventListener('click', (e) => {
                 const idx = parseInt(btn.getAttribute('data-delg'));
                 groceries.splice(idx, 1);
-                if (dbEnabled) saveAllToFirebase();
-                else saveToLocalStorage();
+                saveAllToFirebase();
                 renderFullDashboard();
             });
         });
@@ -672,11 +694,10 @@
     function addNewGrocery() {
         const input = document.getElementById('newGroceryName');
         let name = input.value.trim();
-        if (name === "") return alert("Введите название продукта");
+        if (name === "") return alert("🥑 Введите название продукта");
         groceries.push({ name: name, inStock: false });
         input.value = "";
-        if (dbEnabled) saveAllToFirebase();
-        else saveToLocalStorage();
+        saveAllToFirebase();
         renderFullDashboard();
     }
     
@@ -690,12 +711,17 @@
         "♨️ Спа-день: маски, ванна с пеной",
         "🌿 Поход в оранжерею",
         "🎤 Караоке дома",
-        "🗝 Квест-комната",
+        "🗝 Квест-комната онлайн",
         "🏕 Выходные на природе",
-        "🍷 Дегустация сыров и вина",
+        "🍷 Дегустация сыров и напитков",
         "📚 Совместное чтение вслух",
         "🎭 Экспромт-театр",
-        "🧘‍♀️ Утренняя йога на траве"
+        "🧘‍♀️ Утренняя йога на траве",
+        "🎲 Настольные игры с уютным пледом",
+        "🍰 Выпечка вместе",
+        "🎵 Концерт любимой группы онлайн",
+        "🌌 Наблюдение за звёздами",
+        "🏰 Прогулка по незнакомому району"
     ];
     
     function generateRandomDate() {
@@ -735,7 +761,7 @@
             </div>
             <div class="card">
                 <h2>🧹 Планировка быта</h2>
-                <p style="font-size:0.85rem; margin-bottom: 0.7rem;">👨‍👩‍👧 Ответственные: нажми на имя, чтобы сменить</p>
+                <p style="font-size:0.85rem; margin-bottom: 0.7rem;">👨‍👩‍👧‍👦 Нажми на имя, чтобы передать обязанность</p>
                 <div id="dutiesContainer"></div>
                 <div class="add-duty">
                     <input type="text" id="newDutyName" placeholder="Новая обязанность">
@@ -752,11 +778,14 @@
                 </div>
             </div>
             <div class="card">
-                <h2>💕 Варианты свиданий</h2>
+                <h2>💕 Идеи для свиданий</h2>
                 <div id="dateIdeaDisplay" class="date-card">✨ ${generateRandomDate()} ✨</div>
-                <button id="generateDateBtn" class="randomize-btn">✨ Случайная идея свидания ✨</button>
+                <button id="generateDateBtn" class="randomize-btn">🎲 Случайная идея</button>
                 <hr>
-                <div style="font-size:0.8rem; text-align:center;">Добавляйте романтику в расписание!</div>
+                <div style="font-size:0.8rem; text-align:center; margin-top: 10px;">
+                    💾 Данные сохраняются автоматически<br>
+                    ${dbEnabled ? '☁️ Облачная синхронизация активна' : '📱 Локальное сохранение в браузере'}
+                </div>
             </div>
         `;
         
